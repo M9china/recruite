@@ -9,7 +9,7 @@
 const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; // 32 chars -> unbiased with & 31
 const RANDOM_LENGTH = 8;
 
-export type RandomSource = (bytes: Uint8Array) => Uint8Array;
+export type RandomSource = (bytes: Uint8Array<ArrayBuffer>) => Uint8Array;
 
 const defaultRandom: RandomSource = (bytes) => globalThis.crypto.getRandomValues(bytes);
 
