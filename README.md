@@ -3,8 +3,23 @@
 Public recruitment website and application backend (Phase 1).
 Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · PostgreSQL · Prisma 6 · Zod 4 · Vitest · Playwright · Vercel.
 
-> **Status:** repository foundation. The public pages (Milestone 2), content APIs (Milestone 3) and application
-> workflow (Milestone 4) are not built yet. The site currently serves a holding page and a `/api/health` check.
+> **Status:** Milestone 2 complete. All public pages are built and read draft content from `src/content` through
+> `src/server/services/content.ts`. Content APIs and the database switch-over (Milestone 3) and the application
+> workflow (Milestone 4) are next. A banner marks the site as draft until `site.contentApproved` is set.
+
+## Editing draft content
+
+Until Milestone 3 moves content into the database, edit these files:
+
+| File | Contains |
+| --- | --- |
+| `src/content/site.ts` | Organisation name, hero and about copy, contact details, verified stats, navigation |
+| `src/content/careers.ts` | Career fields and roles, with opening and closing dates |
+| `src/content/recruitment.ts` | Benefits, process steps, eligibility, FAQs, announcements |
+| `src/content/legal.ts` | Legal page outlines |
+
+Photos: add licensed images under `public/images/` and set `image: { src, alt }` on a category (or pass `image`
+to `Hero`). Until then each photo position shows a placeholder describing the shot it needs.
 
 ## Quick start
 
