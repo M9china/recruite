@@ -6,7 +6,7 @@
  * until then a banner on every page says the content is a draft.
  */
 export const site = {
-  name: "Organisation Name",
+  name: "Join-Army",
   shortName: "Careers",
   contentApproved: false,
 
@@ -17,7 +17,7 @@ export const site = {
 
   intro: {
     heading: "Who we are",
-    body: "Approved introduction to the organisation goes here: who it serves, what it does, and why people choose to join. Keep it to two or three sentences.",
+    body: "Approved introduction to the organisation goes here: who it serves, what it does, and why people choose to join.",
   },
 
   about: {
