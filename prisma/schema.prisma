@@ -1,0 +1,226 @@
+// Phase 1 schema. See docs/ARCHITECTURE.md for the reasoning behind each model.
+// Optional personal fields (date of birth, ID number, citizenship) are deliberately
+// absent until the client confirms they are required; add them by migration.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum OpportunityStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ASSESSMENT_REQUIRED
+  SHORTLISTED
+  UNSUCCESSFUL
+  ACCEPTED
+  WITHDRAWN
+}
+
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum OutboxStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model CareerCategory {
+  id            String              @id @default(cuid())
+  name          String
+  slug          String              @unique
+  description   String
+  displayOrder  Int                 @default(0)
+  published     Boolean             @default(false)
+  opportunities CareerOpportunity[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([published, displayOrder])
+}
+
+model CareerOpportunity {
+  id                      String                   @id @default(cuid())
+  categoryId              String
+  category                CareerCategory           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  title                   String
+  slug                    String                   @unique
+  summary                 String
+  description             String
+  responsibilities        String[]
+  qualifications          String[]
+  eligibilityRequirements String[]
+  applicationInstructions String
+  status                  OpportunityStatus        @default(DRAFT)
+  applicationOpenAt       DateTime?
+  applicationCloseAt      DateTime?
+  applications            RecruitmentApplication[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+
+  @@index([status, applicationCloseAt])
+  @@index([categoryId])
+}
+
+/// Configurable, client-approved eligibility content.
+model EligibilityCriterion {
+  id           String   @id @default(cuid())
+  group        String
+  title        String
+  body         String
+  displayOrder Int      @default(0)
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([published, group, displayOrder])
+}
+
+model Applicant {
+  id           String                   @id @default(cuid())
+  firstName    String
+  lastName     String
+  /// Stored lowercased and trimmed; see normaliseEmail().
+  email        String                   @unique
+  phone        String
+  region       String?
+  applications RecruitmentApplication[]
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+}
+
+model RecruitmentApplication {
+  id                   String                    @id @default(cuid())
+  referenceNumber      String                    @unique
+  applicantId          String
+  applicant            Applicant                 @relation(fields: [applicantId], references: [id], onDelete: Restrict)
+  careerOpportunityId  String
+  careerOpportunity    CareerOpportunity         @relation(fields: [careerOpportunityId], references: [id], onDelete: Restrict)
+  status               ApplicationStatus         @default(SUBMITTED)
+  /// Validated by a versioned Zod schema; see formVersion.
+  education            Json
+  formVersion          Int
+  idempotencyKey       String                    @unique
+  privacyNoticeVersion String
+  consentedAt          DateTime
+  submittedAt          DateTime
+  documents            ApplicationDocument[]
+  statusHistory        ApplicationStatusChange[]
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  @@unique([applicantId, careerOpportunityId])
+  @@index([careerOpportunityId, status])
+  @@index([submittedAt])
+}
+
+/// Written on submit; becomes the audit trail for Phase 2 status changes.
+model ApplicationStatusChange {
+  id            String                 @id @default(cuid())
+  applicationId String
+  application   RecruitmentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fromStatus    ApplicationStatus?
+  toStatus      ApplicationStatus
+  /// null = system. Phase 2: the administrator's user id.
+  changedBy     String?
+  note          String?
+  createdAt     DateTime               @default(now())
+
+  @@index([applicationId, createdAt])
+}
+
+/// Metadata only. File contents live in private object storage.
+model ApplicationDocument {
+  id               String                  @id @default(cuid())
+  applicationId    String?
+  application      RecruitmentApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  uploadToken      String                  @unique
+  storageKey       String                  @unique
+  documentType     String
+  originalFilename String
+  verifiedMimeType String
+  fileSize         Int
+  createdAt        DateTime                @default(now())
+
+  @@index([applicationId])
+}
+
+model RecruitmentAnnouncement {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  summary     String
+  content     String
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  closingAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+}
+
+model Faq {
+  id           String   @id @default(cuid())
+  question     String
+  answer       String
+  category     String
+  displayOrder Int      @default(0)
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([published, category, displayOrder])
+}
+
+model ContactInquiry {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    InquiryStatus @default(NEW)
+  createdAt DateTime      @default(now())
+
+  @@index([status, createdAt])
+}
+
+/// Transactional outbox: rows are written with the record they describe,
+/// then delivered after commit. A failed send is retried, never lost.
+model EmailOutbox {
+  id            String       @id @default(cuid())
+  template      String
+  toEmail       String
+  payload       Json
+  relatedId     String?
+  status        OutboxStatus @default(PENDING)
+  attempts      Int          @default(0)
+  lastError     String?
+  nextAttemptAt DateTime     @default(now())
+  sentAt        DateTime?
+  createdAt     DateTime     @default(now())
+
+  @@index([status, nextAttemptAt])
+}
