@@ -21,6 +21,9 @@ blob-report/
 # vercel
 .vercel
 
+# local document uploads (development only)
+.data/
+
 # misc
 .DS_Store
 *.log

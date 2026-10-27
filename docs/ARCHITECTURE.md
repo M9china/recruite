@@ -31,8 +31,23 @@ services, so nothing below the route layer is rewritten.
 | `ApplicationStatusChange` written from day one | Phase 2 gets a complete audit trail, including the initial `SUBMITTED` |
 | Random, non-sequential references | Easy to read aloud, reveals nothing about volume |
 | Env validated on first use, not at import | Builds succeed before every Phase 1 secret exists |
-| Optional personal fields omitted | POPIA minimality; added by migration only when the client confirms need |
+| Questionnaire stored as versioned JSON | Validated by one Zod schema; core contact fields are also columns on `Applicant` for search |
+| Uploads before submission, claimed by secret token | Files are checked and stored first; the token (hashed in the DB) ties them to one application |
+| Repositories behind interfaces | Services are tested with in-memory fakes; Prisma code is covered by the CI integration test |
 | Next.js 15 + Prisma 6 | Stable, well-documented configuration; upgrade to newer majors as a separate, tested change |
+
+## Application flow
+
+```
+Browser                      /api/public/v1/uploads              /api/public/v1/applications
+  │ photo, documents ──────▶ sniff type, size, store privately
+  │ ◀── secret token ─────── record (hash of token, unattached)
+  │ answers + tokens ──────────────────────────────────────────▶ validate (shared Zod schema)
+  │                                                             role open now? tokens valid? one photo?
+  │                                                             one transaction: applicant, application,
+  │                                                             status history, attach documents, queue email
+  │ ◀── reference number ───────────────────────────────────────
+```
 
 ## Not in Phase 1
 

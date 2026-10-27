@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
-import {
+import { createContentService } from "@/server/services/content-core";
+import { seedContentRepository } from "../support/fakes";
+
+const now = new Date("2026-10-27T12:00:00+02:00");
+const {
   getOpportunity,
   listActiveAnnouncements,
   listAnnouncements,
+  listApplyableOpportunities,
   listCategories,
   listOpportunities,
-} from "@/server/services/content";
-
-const now = new Date("2026-10-27T12:00:00+02:00");
+} = createContentService(seedContentRepository);
 
 describe("content service", () => {
   it("orders roles: applyable first, then upcoming, then closed", async () => {
@@ -19,6 +22,11 @@ describe("content service", () => {
       "health-care-assistant",
       "network-support-technician",
     ]);
+  });
+
+  it("offers only roles accepting applications on the form", async () => {
+    const slugs = (await listApplyableOpportunities(now)).map((o) => o.slug);
+    expect(slugs).toEqual(["vehicle-technician-trainee", "supply-chain-clerk", "field-operations-recruit"]);
   });
 
   it("counts only roles accepting applications per category", async () => {

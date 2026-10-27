@@ -5,6 +5,8 @@ import { Container } from "@/components/ui/Container";
 import { TextLink } from "@/components/ui/TextLink";
 import { listFaqGroups } from "@/server/services/content";
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "FAQ",
   description: "Answers to common questions about applying, eligibility and what happens next.",

@@ -119,8 +119,9 @@ model RecruitmentApplication {
   careerOpportunityId  String
   careerOpportunity    CareerOpportunity         @relation(fields: [careerOpportunityId], references: [id], onDelete: Restrict)
   status               ApplicationStatus         @default(SUBMITTED)
-  /// Validated by a versioned Zod schema; see formVersion.
-  education            Json
+  /// Applicant questionnaire answers, validated by the Zod schema whose
+  /// version is in formVersion (src/lib/validation/questionnaire.ts).
+  questionnaire        Json
   formVersion          Int
   idempotencyKey       String                    @unique
   privacyNoticeVersion String
@@ -154,8 +155,10 @@ model ApplicationStatusChange {
 /// Metadata only. File contents live in private object storage.
 model ApplicationDocument {
   id               String                  @id @default(cuid())
+  /// null until the upload is attached to a submitted application.
   applicationId    String?
   application      RecruitmentApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  /// SHA-256 hex of the secret token given to the uploader. The token itself is never stored.
   uploadToken      String                  @unique
   storageKey       String                  @unique
   documentType     String
@@ -165,6 +168,7 @@ model ApplicationDocument {
   createdAt        DateTime                @default(now())
 
   @@index([applicationId])
+  @@index([applicationId, createdAt])
 }
 
 model RecruitmentAnnouncement {

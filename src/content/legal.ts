@@ -4,7 +4,13 @@
  * data-processing notice outlines follow the topics POPIA requires a
  * responsible party to address (sections 17 and 18 of the Act).
  */
-export type LegalDoc = { title: string; lede: string; sections: string[] };
+/**
+ * Stored with every application as evidence of which notice the applicant
+ * accepted. Change it whenever the approved data-processing notice changes.
+ */
+export const PRIVACY_NOTICE_VERSION = "draft-2026-10";
+
+export type LegalDoc ={ title: string; lede: string; sections: string[] };
 
 export const legalContent: Record<string, LegalDoc> = {
   privacy: {

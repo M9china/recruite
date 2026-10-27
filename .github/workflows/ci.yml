@@ -32,6 +32,8 @@ jobs:
       SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/recruitment_shadow?schema=public
       APP_BASE_URL: http://localhost:3000
       EMAIL_PROVIDER: console
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: .data/uploads
       NEXT_TELEMETRY_DISABLED: 1
 
     steps:
@@ -64,6 +66,11 @@ jobs:
 
       - name: Unit and integration tests
         run: npm test
+
+      - name: Load draft content (pages are pre-rendered from the database at build time)
+        run: npm run db:seed
+        env:
+          SEED_SAMPLE_CONTENT: "true"
 
       - name: Production build
         run: npm run build

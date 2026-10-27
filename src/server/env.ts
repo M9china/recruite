@@ -23,7 +23,10 @@ const EnvSchema = z.object({
   UPSTASH_REDIS_REST_TOKEN: optional,
   CRON_SECRET: optional,
 
+  STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
+  STORAGE_LOCAL_DIR: z.string().default(".data/uploads"),
   STORAGE_ENDPOINT: optional,
+  STORAGE_REGION: z.string().default("auto"),
   STORAGE_BUCKET: optional,
   STORAGE_ACCESS_KEY_ID: optional,
   STORAGE_SECRET_ACCESS_KEY: optional,
@@ -43,6 +46,16 @@ export function getEnv(): Env {
   }
   if (parsed.data.NODE_ENV === "production" && parsed.data.EMAIL_PROVIDER === "console") {
     throw new Error("EMAIL_PROVIDER=console is not allowed in production");
+  }
+  // Vercel's filesystem is temporary, so uploaded documents would be lost.
+  if (process.env.VERCEL && parsed.data.STORAGE_DRIVER === "local") {
+    throw new Error("STORAGE_DRIVER=local is not allowed on Vercel; configure private S3-compatible storage");
+  }
+  if (parsed.data.STORAGE_DRIVER === "s3") {
+    const missing = (["STORAGE_BUCKET", "STORAGE_ACCESS_KEY_ID", "STORAGE_SECRET_ACCESS_KEY"] as const).filter(
+      (k) => !parsed.data[k],
+    );
+    if (missing.length) throw new Error(`Invalid server environment: ${missing.join(", ")}`);
   }
   cached = parsed.data;
   return cached;

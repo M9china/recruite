@@ -3,20 +3,24 @@
 Public recruitment website and application backend (Phase 1).
 Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · PostgreSQL · Prisma 6 · Zod 4 · Vitest · Playwright · Vercel.
 
-> **Status:** Milestone 2 complete. All public pages are built and read draft content from `src/content` through
-> `src/server/services/content.ts`. Content APIs and the database switch-over (Milestone 3) and the application
-> workflow (Milestone 4) are next. A banner marks the site as draft until `site.contentApproved` is set.
+> **Status:** public site and online application built. Pages read content from PostgreSQL through
+> `src/server/services/content.ts`. Applicants complete a 7-step questionnaire with a photo and supporting
+> documents, which is validated and saved on the server (see [docs/API.md](docs/API.md)). Still to do: sending the
+> queued confirmation emails, a working contact form, and Turnstile bot checks. A banner marks the site as draft
+> until `site.contentApproved` is set.
 
 ## Editing draft content
 
-Until Milestone 3 moves content into the database, edit these files:
+| File | Contains | Where it lives |
+| --- | --- | --- |
+| `src/content/site.ts` | Organisation name, hero and about copy, contact details, verified stats, navigation | Code |
+| `src/content/recruitment.ts` | Benefits and process steps | Code |
+| `src/content/legal.ts` | Legal page outlines and `PRIVACY_NOTICE_VERSION` | Code |
+| `prisma/seed-data/careers.ts` | Career fields and roles, with opening and closing dates | Database (via seed) |
+| `prisma/seed-data/records.ts` | Eligibility, FAQs, announcements | Database (via seed) |
 
-| File | Contains |
-| --- | --- |
-| `src/content/site.ts` | Organisation name, hero and about copy, contact details, verified stats, navigation |
-| `src/content/careers.ts` | Career fields and roles, with opening and closing dates |
-| `src/content/recruitment.ts` | Benefits, process steps, eligibility, FAQs, announcements |
-| `src/content/legal.ts` | Legal page outlines |
+The seed is for development only. Run `SEED_SAMPLE_CONTENT=true npm run db:seed` after editing the seed files.
+Production content will be managed through the Phase 2 dashboard (or entered directly in the database until then).
 
 Photos: add licensed images under `public/images/` and set `image: { src, alt }` on a category (or pass `image`
 to `Hero`). Until then each photo position shows a placeholder describing the shot it needs.
@@ -30,7 +34,7 @@ npm install                      # also runs `prisma generate`; commit the gener
 cp .env.example .env.local       # then edit the values
 cp .env.local .env               # Prisma CLI reads .env
 npm run db:deploy                # apply migrations
-SEED_SAMPLE_CONTENT=true npm run db:seed   # optional: clearly-labelled sample content
+SEED_SAMPLE_CONTENT=true npm run db:seed   # draft roles and content, so the site and form have data
 npm run dev                      # http://localhost:3000
 ```
 

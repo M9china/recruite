@@ -105,9 +105,12 @@ export function SiteHeader({ items }: { items: readonly NavItem[] }) {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/apply" className={buttonClasses("accent", "hidden min-h-10 px-5 sm:inline-flex")}>
-            Apply now
-          </Link>
+          {/* Wrapper controls visibility: `hidden` on the link itself would clash with the button's inline-flex. */}
+          <span className="hidden sm:block">
+            <Link href="/apply" className={buttonClasses("accent", "min-h-10 px-5")}>
+              Apply now
+            </Link>
+          </span>
           <button
             ref={toggleRef}
             type="button"

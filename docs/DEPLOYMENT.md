@@ -30,19 +30,32 @@ because every request makes database round trips.
 | `TURNSTILE_SECRET_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Milestone 4 | Bot protection for forms |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Milestone 4 | Rate limiting |
 | `CRON_SECRET` | Milestone 4 | Protects the email-retry cron route |
-| `STORAGE_*` | If uploads approved | Private bucket only |
+| `STORAGE_DRIVER` | Yes | `s3` on Vercel (`local` is refused there because its disk is temporary) |
+| `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` | Yes | Private bucket with public access blocked |
+| `STORAGE_ENDPOINT`, `STORAGE_REGION` | Depends | Leave the endpoint empty for AWS S3; set it for Cloudflare R2 (region `auto`) |
 | `SHADOW_DATABASE_URL` | CI / local only | Never needed on Vercel |
 
 Only variables prefixed `NEXT_PUBLIC_` reach the browser. Never put a secret behind that prefix.
 
-## 3. Preview deployments
+## 3. Document storage
+
+Applicant photos and documents go to an S3-compatible bucket, never to the database or `/public`.
+
+1. Create a bucket in the same jurisdiction as the database. Cloudflare R2 and AWS S3 (`af-south-1`, Cape Town) both work.
+2. Block all public access. Do not add a public URL or custom domain to the bucket.
+3. Create an API key limited to that bucket with object read and write (Phase 2 staff access needs read).
+4. Set the `STORAGE_*` variables above.
+5. Unattached uploads older than 24 hours can be deleted. A clean-up job is planned; until then, a lifecycle rule
+   cannot tell attached from unattached files, so don't add one.
+
+## 4. Preview deployments
 
 Every deploy runs migrations, **so previews must not use the production database.** Either:
 
 - use the Neon Vercel integration, which creates a database branch per preview, or
 - set a separate staging `DATABASE_URL` / `DIRECT_URL` for the Preview environment.
 
-## 4. Changing the schema
+## 5. Changing the schema
 
 1. Edit `prisma/schema.prisma`.
 2. `npm run db:migrate -- --name describe_change` to generate the SQL.
@@ -50,20 +63,20 @@ Every deploy runs migrations, **so previews must not use the production database
    expand → backfill → contract releases.
 4. Commit both files. CI's drift check fails if they disagree.
 
-## 5. Backups and recovery
+## 6. Backups and recovery
 
 - Enable point-in-time recovery on the database (Neon and Supabase both offer it on paid plans); keep at least 7 days.
 - Take a logical backup before each production migration: `pg_dump "$DIRECT_URL" -Fc -f pre-migration.dump`.
 - Test a restore into a scratch database at least once per quarter and record the result.
 - Backups contain personal information: store them encrypted, in the same jurisdiction, with restricted access.
 
-## 6. Monitoring
+## 7. Monitoring
 
 - Point an uptime monitor at `/api/health` (expects 200; 503 means the database is unreachable).
 - Add Sentry (`@sentry/nextjs`) before launch for error tracking; configure it to scrub request bodies.
 - Vercel logs carry the structured JSON from `src/server/logging/logger.ts`; search by `event` or `requestId`.
 
-## 7. Release checklist
+## 8. Release checklist
 
 - [ ] CI green on `main`
 - [ ] All required environment variables set for Production
@@ -71,6 +84,9 @@ Every deploy runs migrations, **so previews must not use the production database
 - [ ] `/api/health` returns ok after deploy
 - [ ] Custom domain with HTTPS; `APP_BASE_URL` matches it
 - [ ] Email sending domain verified (SPF, DKIM, DMARC)
+- [ ] Document bucket private; `STORAGE_DRIVER=s3`; a test upload succeeds
+- [ ] Upstash Redis configured, so rate limits are shared across instances
+- [ ] Client has approved the questionnaire fields and the data-processing notice covers them
 - [ ] Legal pages approved by the client; privacy notice version updated
 - [ ] `robots` set to index in `src/app/layout.tsx` only when the client approves launch
 - [ ] Test application submitted end-to-end on production, then removed

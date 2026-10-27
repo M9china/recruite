@@ -1,8 +1,8 @@
-import type { CareerCategory, CareerOpportunity } from "./types";
+import type { CareerCategory, CareerOpportunity } from "@/content/types";
 
 /**
- * DRAFT sample content, replaced by client-confirmed records in the database
- * from Milestone 3. Requirements are deliberately left unstated: the site must
+ * DRAFT sample records loaded by `npm run db:seed` (development only),
+ * replaced by client-confirmed records. Requirements are deliberately left unstated: the site must
  * never publish recruitment policy the organisation has not approved.
  */
 const TO_CONFIRM = "To be confirmed by the organisation for this intake.";

@@ -4,6 +4,8 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { listEligibilityGroups } from "@/server/services/content";
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "Eligibility",
   description: "The general requirements every applicant must meet, and where to find role-specific requirements.",
