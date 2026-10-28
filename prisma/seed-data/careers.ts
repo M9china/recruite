@@ -10,17 +10,17 @@ const TO_CONFIRM = "To be confirmed by the organisation for this intake.";
 export const categories: CareerCategory[] = [
   {
     id: "cat-field",
-    name: "Field operations",
+    name: "Combat Arms",
     slug: "field-operations",
-    description: "Front-line roles that train for deployment, patrol and protection duties.",
+    description: "Infantry, mechanized, reconnaissance. Direct combat roles with full field training.",
     displayOrder: 1,
     published: true,
   },
   {
     id: "cat-engineering",
-    name: "Engineering and technical",
+    name: "Technical Support",
     slug: "engineering-technical",
-    description: "Build, maintain and repair the equipment, vehicles and infrastructure others rely on.",
+    description: "Communications, engineering, maintenance. Technical specializations with certification.",
     displayOrder: 2,
     published: true,
   },

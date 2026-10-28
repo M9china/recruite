@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 export const fieldId = (path: string) => `f-${path.replace(/\./g, "-")}`;
 
 const inputBase =
-  "mt-2 block w-full rounded-[var(--radius-control)] border bg-white px-3.5 py-3 text-base text-charcoal-900 placeholder:text-stone-500 focus:outline-2 focus:outline-offset-0 focus:outline-sand-400";
+  "mt-2 block w-full rounded-[var(--radius-control)] border bg-white px-3.5 py-2 text-base text-charcoal-900 placeholder:text-stone-500 focus:outline-2 focus:outline-offset-0 focus:outline-sand-400";
 
 function describedBy(id: string, hint?: string, error?: string) {
   return [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(" ") || undefined;

@@ -18,27 +18,27 @@ export const benefits: Benefit[] = [
 /** The real process must be confirmed by the client; steps 5 and 6 especially. */
 export const processSteps: ProcessStep[] = [
   {
-    title: "Check you are eligible",
-    body: "Read the eligibility requirements and make sure you meet them before you apply.",
+    title: "ChECK YOU ARE ELIGIBLE",
+    body: "Fill out the form on the website. We will contact you within 24 hours.",
   },
   {
-    title: "Choose a role",
-    body: "Browse open roles by field. Each role shows what you will do, what you need and when applications close.",
+    title: "MEETING WITH THE MANAGER",
+    body: "Initial selection: checking compliance with basic requirements (age, health, documents).",
   },
   {
-    title: "Apply online",
-    body: "Complete the application form. You can review everything before you submit.",
+    title: "INTERVIEW & CALL",
+    body: "Detailed interview to assess motivation and choose the right military specialty.",
   },
   {
-    title: "Get your reference number",
-    body: "When your application is submitted, you will see a reference number on screen and receive it by email. Keep it for any questions.",
+    title: "DOCUMENTS SUBMISSION",
+    body: "Filling out an application form and submitting a package of documents to the authorized bodies for verification",
   },
   {
-    title: "Assessment, if selected",
-    body: "Shortlisted applicants are contacted through official channels with details of the next steps.",
+    title: "MEDICAL TESTS",
+    body: "Optional — undergoing a medical examination to confirm fitness for service.",
   },
   {
-    title: "Hear the outcome",
-    body: "You will be told the outcome of your application by email.",
+    title: "FINAL MEDICAL AND CONTRACT SIGNING",
+    body: "Final medical commission, signing the contract, departure to the training camp for basic training",
   },
 ];

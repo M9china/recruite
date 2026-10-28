@@ -17,7 +17,7 @@ export const site = {
 
   intro: {
     heading: "Who we are",
-    body: "Approved introduction to the organisation goes here: who it serves, what it does, and why people choose to join.",
+    body: "We are an authorized intermediary for contract service applications in accordance with applicable laws. This site is for informational purposes. Final decisions are made by authorities.",
   },
 
   about: {
